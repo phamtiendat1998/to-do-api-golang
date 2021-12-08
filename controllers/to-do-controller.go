@@ -88,7 +88,7 @@ func (server *Server) UpdateToDo(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
-	// Check if the post id is valid
+	// Check if the todo id is valid
 	pid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -102,7 +102,7 @@ func (server *Server) UpdateToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the post exist
+	// Check if the todo exist
 	todo := models.ToDo{}
 	err = server.DB.Debug().Model(models.ToDo{}).Where("id = ?", pid).Take(&todo).Error
 	if err != nil {
@@ -110,12 +110,12 @@ func (server *Server) UpdateToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If a user attempt to update a post not belonging to him
+	// If a user attempt to update a todo not belonging to him
 	if uid != todo.AuthorID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	// Read the data posted
+	// Read the data todoed
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -143,7 +143,7 @@ func (server *Server) UpdateToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// This is important to tell the model the post id to update, the other update field are set above
+	// This is important to tell the model the todo id to update, the other update field are set above
 	todoUpdate.ID = todo.ID
 
 	todoUpdated, err := todoUpdate.UpdateATodo(server.DB)
@@ -160,7 +160,7 @@ func (server *Server) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
-	// Is a valid post id given to us?
+	// Is a valid todo id given to us?
 	pid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -174,7 +174,7 @@ func (server *Server) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the post exist
+	// Check if the todo exist
 	todo := models.ToDo{}
 	err = server.DB.Debug().Model(models.ToDo{}).Where("id = ?", pid).Take(&todo).Error
 	if err != nil {
@@ -182,7 +182,7 @@ func (server *Server) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Is the authenticated user, the owner of this post?
+	// Is the authenticated user, the owner of this todo?
 	if uid != todo.AuthorID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
